@@ -17,7 +17,6 @@
 body{
   background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;
   min-height:100vh;
-  /* Fix for iOS bottom bar */
   min-height:-webkit-fill-available; 
   overflow-x:hidden;
 }
@@ -42,7 +41,6 @@ body{
 #app{display:none;}
 header{
   border-bottom:1px solid var(--border);padding:0 1.5rem;position:sticky;top:0;background:rgba(10,10,10,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:100;display:flex;align-items:center;gap:1rem;
-  /* iOS Safe Area Padding */
   padding-top:env(safe-area-inset-top);
   height:calc(56px + env(safe-area-inset-top));
 }
@@ -69,7 +67,7 @@ header{
 /* LAYOUT */
 .shell{display:grid;grid-template-columns:170px 1fr;}
 .sidebar{border-right:1px solid var(--border);padding:1.25rem 0;position:sticky;top:calc(56px + env(safe-area-inset-top));height:calc(100vh - 56px - env(safe-area-inset-top));overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:999;}
 .sl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;padding:0 1rem;margin-bottom:5px;margin-top:.875rem;}
 .si{padding:10px 1rem;font-size:14px;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;border-left:2px solid transparent;}
 .si:hover{color:var(--text);background:var(--surface2);} .si.on{color:var(--text);border-left-color:var(--green);background:var(--gdim);}
@@ -122,7 +120,7 @@ header{
 .ldot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;}
 
 /* MODAL */
-#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:500;align-items:center;justify-content:center;}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:2000;align-items:center;justify-content:center;}
 #modal.on{display:flex;animation:fi .2s ease;}
 .mbox{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:1.5rem;width:min(400px,92vw);max-height:85vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
 .mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
@@ -148,25 +146,36 @@ header{
 
 @keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-/* INCREASED BREAKPOINT TO 850px SO IT WORKS ON ALL IPHONES */
+/* BULLETPROOF MOBILE LAYOUT */
 @media(max-width:850px){
   .shell{grid-template-columns:1fr;} 
-  .sidebar{display:none;}
   header{padding:0 1rem;gap:.5rem; padding-top:env(safe-area-inset-top);} 
   .logo{display:none;}
   .content{padding:1rem; padding-bottom:calc(3rem + env(safe-area-inset-bottom));} 
   .banner{padding:1.5rem 1rem 1.25rem;}
   .menu-btn{display:flex;}
   .pnav{font-size:10px; padding:6px 10px;}
-  
-  /* FIX APPLIED HERE: left changed from -220px to 0 */
-  .sidebar.mobile{display:block;position:fixed;left:0;top:0;width:220px;height:100vh;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);z-index:101;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);transform:translateX(-100%); padding-top:calc(20px + env(safe-area-inset-top)); padding-bottom:env(safe-area-inset-bottom);}
-  .sidebar.mobile.open{transform:translateX(0);}
-  .overlay{display:block; z-index:100;}
   .si{min-height:48px;padding:12px 1.25rem;}
-  
-  /* Make day grid columns fit better on narrow screens */
   .hab-grid{grid-template-columns:repeat(5,1fr);}
+
+  /* Completely stripped down, strict positioning for sidebar */
+  .sidebar{
+    display:block;
+    position:fixed;
+    left:-300px; /* Hidden off screen */
+    top:0;
+    width:260px;
+    height:100vh;
+    background:rgba(10,10,10,0.98);
+    border-right:1px solid var(--border);
+    z-index:1000;
+    transition:left 0.3s ease-in-out;
+    padding-top:calc(20px + env(safe-area-inset-top));
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .sidebar.open{
+    left:0; /* Slid on screen */
+  }
 }
 </style>
 </head>
@@ -189,7 +198,7 @@ header{
 
 <div id="app">
 <header>
-  <button class="menu-btn" id="menu-btn">☰</button>
+  <button class="menu-btn" id="menu-btn" onclick="toggleMenu()">☰</button>
   <div class="logo">F<span>.</span>Plan</div>
   <div class="pnav-wrap">
     <div class="pnav on" onclick="setPhase(0)">Month 1–2</div>
@@ -202,7 +211,7 @@ header{
   </div>
 </header>
 
-<div class="overlay" id="overlay"></div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <div class="banner on" id="b0">
   <div class="bey">Phase 01 · Days 1–60</div>
@@ -433,7 +442,6 @@ const PKS={
   2:['2m1','2m2','2m3','2g1','2g2','2n1','2n2','2n3','2n4','2w1','2w2','2c1','2c2','2c3'],
 };
 
-/* DAY STEPS — what shows in modal per phase */
 const DS={
   0:[
     {sec:'Morning',items:['Cetaphil face wash (60 sec, lukewarm)','BP body wash on back — 3–5 min wait','Cetaphil PRO SPF 30 on face']},
@@ -459,14 +467,10 @@ function setPhase(p){
   document.querySelectorAll('.pnav').forEach((el,i)=>el.classList.toggle('on',i===p));
   document.querySelectorAll('.banner').forEach((el,i)=>el.classList.toggle('on',i===p));
   
-  // if user was on settings, keep them on settings in the new phase
-  if(AS === 'settings' || AS === 'days') {
-      setSec(AS);
-  } else {
-      setSec('morning');
-  }
-  updProg();
+  if(AS === 'settings' || AS === 'days') setSec(AS);
+  else setSec('morning');
   
+  updProg();
   if(window.innerWidth <= 850) closeMenu();
 }
 
@@ -483,21 +487,16 @@ function setSec(s){
   if(window.innerWidth <= 850) closeMenu();
 }
 
-/* MOBILE MENU */
-document.getElementById('menu-btn').addEventListener('click',toggleMenu);
-document.getElementById('overlay').addEventListener('click',closeMenu);
-
+/* MOBILE MENU JAVASCRIPT - COMPLETELY REWRITTEN */
 function toggleMenu(){
   const sb = document.getElementById('sidebar');
-  sb.classList.add('mobile');
   sb.classList.toggle('open');
-  document.getElementById('overlay').style.display=sb.classList.contains('open')?'block':'none';
+  document.getElementById('overlay').style.display = sb.classList.contains('open') ? 'block' : 'none';
 }
 
 function closeMenu(){
-  const sb = document.getElementById('sidebar');
-  sb.classList.remove('open');
-  document.getElementById('overlay').style.display='none';
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').style.display = 'none';
 }
 
 function tog(key){
@@ -549,7 +548,6 @@ function dnum(date){
 
 function phaseForDay(n){return n<=60?0:n<=120?1:2;}
 
-/* GRIDS */
 function buildGrids(){
   [0,1,2].forEach(ph=>{
     const grid=document.getElementById('g'+ph);
@@ -573,8 +571,6 @@ function updGrid(ph){
   const days=ST.days||{};
   const start=ph*60+1;
   let done=0;
-  
-  // Base items length
   const baseItems = DS[ph].reduce((a,s)=>a+s.items.length,0);
   
   for(let d=0;d<60;d++){
@@ -583,8 +579,6 @@ function updGrid(ph){
     if(!cell)continue;
     const k='d'+n;
     const checked=(days[k]||[]).length;
-    
-    // Calculate custom items for this specific day
     let customItems = 0;
     if(ST.custom && ST.custom[ph]){
         ST.custom[ph].forEach(c => {
@@ -602,13 +596,10 @@ function updGrid(ph){
   if(stat)stat.textContent=done+' / 60 complete';
 }
 
-/* TRACKER MODAL */
 function openModal(n){
   const ph=phaseForDay(n);
-  // Deep copy so we don't accidentally mutate the global DS object
   const secs=JSON.parse(JSON.stringify(DS[ph])); 
   
-  // Inject custom habits for this phase AND this day
   if(ST.custom && ST.custom[ph]){
     const dayInPhase = n - ph*60;
     const customForDay = [];
@@ -657,9 +648,7 @@ function togDay(n,idx,el,ph){
 }
 
 function closeModal(){document.getElementById('modal').classList.remove('on');}
-document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-/* HABIT SETTINGS MODAL */
 function openAddHabitModal(){
   let html=`<div class="mhdr"><div class="mtitle">Add Habit</div><button class="mclose" onclick="closeModal()">✕</button></div>`;
   html+=`<div class="mseclbl" style="margin-top:0;">Phase</div>`;
@@ -730,16 +719,13 @@ function saveCustomHabit(){
   ST.custom[phase].push({key, name, days});
   sv();
   
-  // Re-render grids to accommodate new habit logic
   updGrid(phase);
-  
   closeModal();
   setTimeout(() => {
     alert(`"${name}" added to Phase ${phase+1}! It will now appear in your Day Tracker.`);
   }, 300);
 }
 
-/* INIT */
 function init(){
   ld();
   if(!ST.start){ST.start=new Date().toISOString();sv();}
@@ -758,22 +744,7 @@ function init(){
   buildGrids();
   updProg();
   setSec('morning');
-  
-  // Initialize sidebar based on screen size so it works properly
-  if(window.innerWidth <= 850) {
-      document.getElementById('sidebar').classList.add('mobile');
-  }
 }
-
-window.addEventListener('resize', () => {
-    const sb = document.getElementById('sidebar');
-    if(window.innerWidth > 850) {
-        sb.classList.remove('mobile', 'open');
-        document.getElementById('overlay').style.display='none';
-    } else {
-        sb.classList.add('mobile');
-    }
-});
 </script>
 </body>
 </html>
