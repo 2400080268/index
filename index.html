@@ -148,7 +148,7 @@ header{
 
 @keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-/* INCREASED BREAKPOINT TO 850px SO IT WORKS ON ALL IPHONES (PRO MAX INCLUDED) */
+/* INCREASED BREAKPOINT TO 850px SO IT WORKS ON ALL IPHONES */
 @media(max-width:850px){
   .shell{grid-template-columns:1fr;} 
   .sidebar{display:none;}
@@ -159,7 +159,8 @@ header{
   .menu-btn{display:flex;}
   .pnav{font-size:10px; padding:6px 10px;}
   
-  .sidebar.mobile{display:block;position:fixed;left:-220px;top:0;width:220px;height:100vh;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);z-index:101;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);transform:translateX(-100%); padding-top:calc(20px + env(safe-area-inset-top)); padding-bottom:env(safe-area-inset-bottom);}
+  /* FIX APPLIED HERE: left changed from -220px to 0 */
+  .sidebar.mobile{display:block;position:fixed;left:0;top:0;width:220px;height:100vh;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);z-index:101;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);transform:translateX(-100%); padding-top:calc(20px + env(safe-area-inset-top)); padding-bottom:env(safe-area-inset-bottom);}
   .sidebar.mobile.open{transform:translateX(0);}
   .overlay{display:block; z-index:100;}
   .si{min-height:48px;padding:12px 1.25rem;}
