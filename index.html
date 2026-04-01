@@ -45,13 +45,17 @@ header{
   height:calc(56px + env(safe-area-inset-top));
 }
 .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:.1em;white-space:nowrap;} .logo span{color:var(--green);}
-.menu-btn{display:none;width:36px;height:36px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:16px;cursor:pointer;border-radius:6px;transition:all .15s;align-items:center;justify-content:center;}
-.menu-btn:hover{background:var(--surface2);}
-.pnav-wrap{display:flex;gap:4px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none;}
+.menu-btn{
+  display:none;width:38px;height:38px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:18px;cursor:pointer;border-radius:8px;transition:all .15s;align-items:center;justify-content:center;
+  position:relative; z-index:900; /* Forces button to be tappable above everything else */
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-btn:active{transform:scale(0.9);}
+.pnav-wrap{display:flex;gap:4px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none; z-index:10;}
 .pnav-wrap::-webkit-scrollbar{display:none;}
 .pnav{font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:100px;border:1px solid var(--border);cursor:pointer;transition:all .2s;color:var(--muted);white-space:nowrap;}
 .pnav:hover{border-color:var(--border2);color:var(--text);} .pnav.on{background:var(--text);color:var(--bg);border-color:var(--text);}
-.hdr-r{display:flex;gap:6px;align-items:center;}
+.hdr-r{display:flex;gap:6px;align-items:center; z-index:10;}
 .spill{font-family:'DM Mono',monospace;font-size:11px;color:var(--amber);background:var(--adim);border:1px solid rgba(251,191,36,.2);border-radius:100px;padding:4px 10px;white-space:nowrap;}
 .ppill{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);background:var(--gdim);border:1px solid rgba(74,222,128,.2);border-radius:100px;padding:4px 10px;white-space:nowrap;}
 
@@ -158,23 +162,21 @@ header{
   .si{min-height:48px;padding:12px 1.25rem;}
   .hab-grid{grid-template-columns:repeat(5,1fr);}
 
-  /* Completely stripped down, strict positioning for sidebar */
+  /* Force sidebar offscreen initially using !important to block cache override */
   .sidebar{
-    display:block;
-    position:fixed;
-    left:-300px; /* Hidden off screen */
-    top:0;
-    width:260px;
-    height:100vh;
-    background:rgba(10,10,10,0.98);
-    border-right:1px solid var(--border);
-    z-index:1000;
-    transition:left 0.3s ease-in-out;
-    padding-top:calc(20px + env(safe-area-inset-top));
-    padding-bottom:env(safe-area-inset-bottom);
-  }
-  .sidebar.open{
-    left:0; /* Slid on screen */
+    display:block !important;
+    position:fixed !important;
+    left:0 !important;
+    top:0 !important;
+    width:260px !important;
+    height:100vh !important;
+    background:rgba(10,10,10,0.98) !important;
+    border-right:1px solid var(--border) !important;
+    z-index:1500 !important; /* Extremely high z-index */
+    transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transform:translateX(-100%); /* Javascript controls this directly now */
+    padding-top:calc(20px + env(safe-area-inset-top)) !important;
+    padding-bottom:env(safe-area-inset-bottom) !important;
   }
 }
 </style>
@@ -198,7 +200,7 @@ header{
 
 <div id="app">
 <header>
-  <button class="menu-btn" id="menu-btn" onclick="toggleMenu()">☰</button>
+  <button type="button" class="menu-btn" id="menu-btn" onclick="toggleMenu()">☰</button>
   <div class="logo">F<span>.</span>Plan</div>
   <div class="pnav-wrap">
     <div class="pnav on" onclick="setPhase(0)">Month 1–2</div>
@@ -487,15 +489,26 @@ function setSec(s){
   if(window.innerWidth <= 850) closeMenu();
 }
 
-/* MOBILE MENU JAVASCRIPT - COMPLETELY REWRITTEN */
+/* * 100% BULLETPROOF MOBILE MENU
+ * We bypass CSS class toggling and use direct inline DOM styles
+ * because iOS Safari caches CSS pseudo-classes aggressively.
+ */
 function toggleMenu(){
   const sb = document.getElementById('sidebar');
-  sb.classList.toggle('open');
-  document.getElementById('overlay').style.display = sb.classList.contains('open') ? 'block' : 'none';
+  const ov = document.getElementById('overlay');
+  
+  // Checking the raw inline style instead of CSS class
+  if (sb.style.transform === 'translateX(0px)') {
+      sb.style.transform = 'translateX(-100%)';
+      ov.style.display = 'none';
+  } else {
+      sb.style.transform = 'translateX(0px)';
+      ov.style.display = 'block';
+  }
 }
 
 function closeMenu(){
-  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar').style.transform = 'translateX(-100%)';
   document.getElementById('overlay').style.display = 'none';
 }
 
@@ -744,7 +757,23 @@ function init(){
   buildGrids();
   updProg();
   setSec('morning');
+  
+  // Set initial off-screen transform state for JS math to work immediately
+  if(window.innerWidth <= 850) {
+      document.getElementById('sidebar').style.transform = 'translateX(-100%)';
+  }
 }
+
+// Adjust sidebar on rotation/resize
+window.addEventListener('resize', () => {
+    const sb = document.getElementById('sidebar');
+    if(window.innerWidth > 850) {
+        sb.style.transform = 'translateX(0)';
+        document.getElementById('overlay').style.display='none';
+    } else {
+        sb.style.transform = 'translateX(-100%)';
+    }
+});
 </script>
 </body>
 </html>
