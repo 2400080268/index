@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Feroz Plan">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧴</text></svg>">
+<link rel="manifest" href="manifest.json">
+<title>Feroz — Skin Comeback Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#f0f0f0;--muted:#888;--faint:#333;--green:#4ade80;--gdim:rgba(74,222,128,0.12);--blue:#60a5fa;--bdim:rgba(96,165,250,0.1);--amber:#fbbf24;--adim:rgba(251,191,36,0.1);--red:#f87171;--rdim:rgba(248,113,113,0.1);--purple:#c084fc;--pdim:rgba(192,132,252,0.1);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;
+  min-height:100vh;
+  /* Fix for iOS bottom bar */
+  min-height:-webkit-fill-available; 
+  overflow-x:hidden;
+}
+::-webkit-scrollbar{width:3px;} ::-webkit-scrollbar-thumb{background:var(--faint);border-radius:4px;}
+
+/* LOCK */
+#lock{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem; padding-bottom:env(safe-area-inset-bottom);}
+.lk-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:.1em;} .lk-logo span{color:var(--green);}
+.lk-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.08em;}
+.pin-dots{display:flex;gap:14px;}
+.pd{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;transition:all .15s;}
+.pd.on{background:var(--green);border-color:var(--green);}
+.pd.err{background:var(--red);border-color:var(--red);}
+.kp{display:grid;grid-template-columns:repeat(3,70px);gap:10px;}
+.k{width:70px;height:70px;border-radius:50%;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:20px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.k:hover{background:var(--surface2);} .k:active{transform:scale(.92);}
+.k.del{font-size:13px;color:var(--muted);}
+.lk-err{font-family:'DM Mono',monospace;font-size:12px;color:var(--red);height:16px;text-align:center;}
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+
+/* HEADER */
+#app{display:none;}
+header{
+  border-bottom:1px solid var(--border);padding:0 1.5rem;position:sticky;top:0;background:rgba(10,10,10,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:100;display:flex;align-items:center;gap:1rem;
+  /* iOS Safe Area Padding */
+  padding-top:env(safe-area-inset-top);
+  height:calc(56px + env(safe-area-inset-top));
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:.1em;white-space:nowrap;} .logo span{color:var(--green);}
+.menu-btn{display:none;width:36px;height:36px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-size:16px;cursor:pointer;border-radius:6px;transition:all .15s;align-items:center;justify-content:center;}
+.menu-btn:hover{background:var(--surface2);}
+.pnav-wrap{display:flex;gap:4px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none;}
+.pnav-wrap::-webkit-scrollbar{display:none;}
+.pnav{font-family:'DM Mono',monospace;font-size:11px;padding:6px 14px;border-radius:100px;border:1px solid var(--border);cursor:pointer;transition:all .2s;color:var(--muted);white-space:nowrap;}
+.pnav:hover{border-color:var(--border2);color:var(--text);} .pnav.on{background:var(--text);color:var(--bg);border-color:var(--text);}
+.hdr-r{display:flex;gap:6px;align-items:center;}
+.spill{font-family:'DM Mono',monospace;font-size:11px;color:var(--amber);background:var(--adim);border:1px solid rgba(251,191,36,.2);border-radius:100px;padding:4px 10px;white-space:nowrap;}
+.ppill{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);background:var(--gdim);border:1px solid rgba(74,222,128,.2);border-radius:100px;padding:4px 10px;white-space:nowrap;}
+
+/* BANNER */
+.banner{display:none;padding:2rem 1.5rem 1.25rem;border-bottom:1px solid var(--border);animation:fi .3s ease;}
+.banner.on{display:block;}
+.bey{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.btitle{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(20px,4vw,36px);line-height:1.1;margin-bottom:8px;}
+.bdesc{font-size:13px;color:var(--muted);max-width:500px;line-height:1.7;}
+.btags{display:flex;gap:6px;margin-top:.75rem;flex-wrap:wrap;}
+.btag{font-family:'DM Mono',monospace;font-size:10px;padding:3px 10px;border-radius:100px;border:1px solid var(--border2);color:var(--muted);}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-columns:170px 1fr;}
+.sidebar{border-right:1px solid var(--border);padding:1.25rem 0;position:sticky;top:calc(56px + env(safe-area-inset-top));height:calc(100vh - 56px - env(safe-area-inset-top));overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+.sl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--faint);text-transform:uppercase;padding:0 1rem;margin-bottom:5px;margin-top:.875rem;}
+.si{padding:10px 1rem;font-size:14px;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;border-left:2px solid transparent;}
+.si:hover{color:var(--text);background:var(--surface2);} .si.on{color:var(--text);border-left-color:var(--green);background:var(--gdim);}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sdiv{height:1px;background:var(--border);margin:.625rem 1rem;}
+
+/* CONTENT */
+.content{padding:1.5rem;max-width:680px;padding-bottom:calc(2rem + env(safe-area-inset-bottom));}
+.prog-row{display:flex;gap:8px;align-items:center;margin-bottom:1.5rem;}
+.pb-bg{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.pb-fill{height:4px;background:var(--green);border-radius:2px;transition:width .3s;}
+.pb-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:40px;text-align:right;}
+
+/* SECTIONS */
+.ts{display:none;animation:fi .25s ease;} .ts.on{display:block;}
+.tlbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:.875rem;display:flex;align-items:center;gap:10px;}
+.tlbl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* STEPS */
+.sr{display:flex;gap:0;margin-bottom:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.sline{display:flex;flex-direction:column;align-items:center;width:34px;flex-shrink:0;}
+.sc{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0;transition:all .2s;}
+.sr.done .sc{background:var(--gdim);border-color:var(--green);color:var(--green);}
+.sconn{width:1px;flex:1;background:var(--border);margin:3px 0;min-height:10px;}
+.scard{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;transition:all .2s;}
+.sr:active .scard{transform:scale(0.98);}
+.sr.done .scard{opacity:.4;}
+.sname{font-weight:500;font-size:14px;color:var(--text);margin-bottom:3px;}
+.sr.done .sname{text-decoration:line-through;color:var(--muted);}
+.sdet{font-size:12px;color:var(--muted);line-height:1.6;}
+.sbadges{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;}
+.b{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:100px;border:1px solid;}
+.bf{color:var(--blue);border-color:rgba(96,165,250,.3);background:var(--bdim);}
+.bk{color:var(--green);border-color:rgba(74,222,128,.3);background:var(--gdim);}
+.bc{color:var(--amber);border-color:rgba(251,191,36,.3);background:var(--adim);}
+.br{color:var(--red);border-color:rgba(248,113,113,.3);background:var(--rdim);}
+.bp{color:var(--purple);border-color:rgba(192,132,252,.3);background:var(--pdim);}
+.abox{border:1px solid rgba(251,191,36,.25);background:var(--adim);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--amber);margin:1rem 0;display:flex;gap:8px;align-items:flex-start;line-height:1.6;}
+
+/* DAY GRID */
+.dg-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.625rem;}
+.dg-title{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.dg-stat{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);}
+.daygrid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-bottom:.625rem;}
+.dc{aspect-ratio:1;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--faint);-webkit-tap-highlight-color:transparent;}
+.dc:active{transform:scale(0.9);}
+.dc.full{background:var(--gdim);border-color:rgba(74,222,128,.4);color:var(--green);}
+.dc.part{background:var(--adim);border-color:rgba(251,191,36,.3);color:var(--amber);}
+.dg-leg{display:flex;gap:1rem;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.ldot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;}
+
+/* MODAL */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:500;align-items:center;justify-content:center;}
+#modal.on{display:flex;animation:fi .2s ease;}
+.mbox{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:1.5rem;width:min(400px,92vw);max-height:85vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+.mtitle{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;}
+.mclose{width:30px;height:30px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.mclose:active{transform:scale(0.9);}
+.msub{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:1rem;}
+.mseclbl{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:1rem 0 8px;}
+.mcheck{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:14px;color:var(--text);line-height:1.5;-webkit-tap-highlight-color:transparent;}
+.mcheck:last-of-type{border-bottom:none;}
+.mcheck input{margin-top:3px;accent-color:var(--green);width:18px;height:18px;flex-shrink:0;}
+.mcheck.ck span{text-decoration:line-through;color:var(--muted);}
+.msave{width:100%;margin-top:1.25rem;padding:14px;border-radius:10px;border:none;background:var(--green);color:var(--bg);font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .15s;letter-spacing:.04em;-webkit-tap-highlight-color:transparent;}
+.msave:active{transform:scale(0.98);opacity:0.9;}
+
+/* HABIT INPUTS */
+.h-input{width:100%;padding:12px 14px;border:1px solid var(--border2);background:var(--bg);color:var(--text);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:1rem;outline:none;}
+.h-input:focus{border-color:var(--green);}
+.hab-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:180px;overflow-y:auto;padding-right:4px;}
+.h-day{aspect-ratio:1;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+.h-day.on{background:var(--gdim);border-color:var(--green);color:var(--green);}
+.sel-all{font-family:'DM Mono',monospace;font-size:11px;color:var(--blue);cursor:pointer;background:none;border:none;padding:0;margin-bottom:10px;}
+
+@keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* INCREASED BREAKPOINT TO 850px SO IT WORKS ON ALL IPHONES (PRO MAX INCLUDED) */
+@media(max-width:850px){
+  .shell{grid-template-columns:1fr;} 
+  .sidebar{display:none;}
+  header{padding:0 1rem;gap:.5rem; padding-top:env(safe-area-inset-top);} 
+  .logo{display:none;}
+  .content{padding:1rem; padding-bottom:calc(3rem + env(safe-area-inset-bottom));} 
+  .banner{padding:1.5rem 1rem 1.25rem;}
+  .menu-btn{display:flex;}
+  .pnav{font-size:10px; padding:6px 10px;}
+  
+  .sidebar.mobile{display:block;position:fixed;left:-220px;top:0;width:220px;height:100vh;background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-right:1px solid var(--border);z-index:101;transition:transform .3s cubic-bezier(0.4, 0, 0.2, 1);transform:translateX(-100%); padding-top:calc(20px + env(safe-area-inset-top)); padding-bottom:env(safe-area-inset-bottom);}
+  .sidebar.mobile.open{transform:translateX(0);}
+  .overlay{display:block; z-index:100;}
+  .si{min-height:48px;padding:12px 1.25rem;}
+  
+  /* Make day grid columns fit better on narrow screens */
+  .hab-grid{grid-template-columns:repeat(5,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="lk-logo">F<span>.</span>Plan</div>
+  <div class="lk-sub">Enter your PIN</div>
+  <div class="pin-dots" id="dots">
+    <div class="pd" id="d0"></div><div class="pd" id="d1"></div><div class="pd" id="d2"></div><div class="pd" id="d3"></div>
+  </div>
+  <div class="lk-err" id="lerr"></div>
+  <div class="kp">
+    <button class="k" onclick="pk('1')">1</button><button class="k" onclick="pk('2')">2</button><button class="k" onclick="pk('3')">3</button>
+    <button class="k" onclick="pk('4')">4</button><button class="k" onclick="pk('5')">5</button><button class="k" onclick="pk('6')">6</button>
+    <button class="k" onclick="pk('7')">7</button><button class="k" onclick="pk('8')">8</button><button class="k" onclick="pk('9')">9</button>
+    <button class="k del" onclick="pdel()">⌫</button><button class="k" onclick="pk('0')">0</button><button class="k" onclick="psub()">↵</button>
+  </div>
+</div>
+
+<div id="app">
+<header>
+  <button class="menu-btn" id="menu-btn">☰</button>
+  <div class="logo">F<span>.</span>Plan</div>
+  <div class="pnav-wrap">
+    <div class="pnav on" onclick="setPhase(0)">Month 1–2</div>
+    <div class="pnav" onclick="setPhase(1)">Month 3–4</div>
+    <div class="pnav" onclick="setPhase(2)">Month 5–6</div>
+  </div>
+  <div class="hdr-r">
+    <div class="spill" id="streak">🔥 0</div>
+    <div class="ppill" id="hprog">0%</div>
+  </div>
+</header>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="banner on" id="b0">
+  <div class="bey">Phase 01 · Days 1–60</div>
+  <div class="btitle">Stop new acne.<br>Build the habit.</div>
+  <div class="bdesc">Foundation phase. Stop new acne before treating marks. BP wash, salicylic alternating, strict gym hygiene. Keep it simple.</div>
+  <div class="btags"><span class="btag">Face: Cleanse + Moisturize + SPF</span><span class="btag">Back: BP wash + Salicylic</span><span class="btag">Gym hygiene mandatory</span></div>
+</div>
+<div class="banner" id="b1">
+  <div class="bey">Phase 02 · Days 61–120</div>
+  <div class="btitle">Fade the marks.<br>Clinic starts.</div>
+  <div class="bdesc">Glycolic acid added 2–3 nights/week on back. Monthly body peels at clinic. Face treatment begins under doctor's supervision.</div>
+  <div class="btags"><span class="btag">Add: Glycolic acid (back nights)</span><span class="btag">Clinic: Body chemical peels</span><span class="btag">Face: Doctor-led peels</span></div>
+</div>
+<div class="banner" id="b2">
+  <div class="bey">Phase 03 · Days 121–180</div>
+  <div class="btitle">Fix the pits.<br>Lock in results.</div>
+  <div class="bdesc">Marks 60–80% faded. Microneedling starts for back/shoulder pits. Face moves to fractional CO2. Routine continues.</div>
+  <div class="btags"><span class="btag">Clinic: Microneedling for back</span><span class="btag">Face: Fractional CO2</span><span class="btag">Maintenance routine</span></div>
+</div>
+
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+  <div class="sl">Routine</div>
+  <div class="si on" onclick="setSec('morning')" id="n-morning"><div class="sdot" style="background:#60a5fa"></div>Morning</div>
+  <div class="si" onclick="setSec('gym')" id="n-gym"><div class="sdot" style="background:#f87171"></div>After gym</div>
+  <div class="si" onclick="setSec('night')" id="n-night"><div class="sdot" style="background:#c084fc"></div>Night</div>
+  <div class="sdiv"></div>
+  <div class="sl">Schedule</div>
+  <div class="si" onclick="setSec('weekly')" id="n-weekly"><div class="sdot" style="background:#fbbf24"></div>Weekly</div>
+  <div class="si" onclick="setSec('clinic')" id="n-clinic"><div class="sdot" style="background:#4ade80"></div>Clinic</div>
+  <div class="sdiv"></div>
+  <div class="sl">More</div>
+  <div class="si" onclick="setSec('settings')" id="n-settings"><div class="sdot" style="background:#60a5fa"></div>Settings</div>
+  <div class="sdiv"></div>
+  <div class="sl">Tracker</div>
+  <div class="si" onclick="setSec('days')" id="n-days"><div class="sdot" style="background:#c084fc"></div>Day tracker</div>
+</aside>
+
+<div class="content">
+  <div class="prog-row">
+    <div class="pb-bg"><div class="pb-fill" id="mpb" style="width:0%"></div></div>
+    <div class="pb-lbl" id="mpl">0 / 0</div>
+  </div>
+
+  <div class="ts on" id="s0-morning">
+    <div class="tlbl">Morning · wake up</div>
+    <div class="sr" onclick="tog('0m1')"><div class="sline"><div class="sc" id="c-0m1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Wash face — Cetaphil Gentle Cleanser</div><div class="sdet">Small amount, gentle circular motion 60 sec. Lukewarm rinse, pat dry.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('0m2')"><div class="sline"><div class="sc" id="c-0m2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Shower + Benzoyl Peroxide body wash (5%)</div><div class="sdet">Apply on full back, shoulders, chest. Leave 3–5 mins before rinsing. The wait time is the whole point — kills bacteria deep.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span><span class="b br">3–5 min wait</span></div></div></div>
+    <div class="sr" onclick="tog('0m3')"><div class="sline"><div class="sc" id="c-0m3">3</div><div class="sconn"></div></div><div class="scard"><div class="sname">Cetaphil PRO Oil Absorbing Moisturizer SPF 30</div><div class="sdet">Pea-sized on face. Moisture + sunscreen in one step. Matte finish, won't feel greasy.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('0m4')"><div class="sline"><div class="sc" id="c-0m4">4</div></div><div class="scard"><div class="sname">Done — you're set for the day</div><div class="sdet">~10 mins total. Nothing extra in Month 1–2. Simplicity = consistency.</div><div class="sbadges"><span class="b bp">Phase 1</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s0-gym">
+    <div class="tlbl">After gym · critical</div>
+    <div class="abox"><span>⚠</span>Sweat sitting 30+ mins on skin = new pimples. This is why back acne keeps returning for most people.</div>
+    <div class="sr" onclick="tog('0g1')"><div class="sline"><div class="sc" id="c-0g1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Change sweaty clothes immediately</div><div class="sdet">Even before shower if needed. Wet gym clothes against skin is an acne factory.</div><div class="sbadges"><span class="b br">Mandatory</span></div></div></div>
+    <div class="sr" onclick="tog('0g2')"><div class="sline"><div class="sc" id="c-0g2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Shower within 10–15 mins + BP wash on back</div><div class="sdet">Leave 1–2 mins this time. Full rinse. Never skip this on gym days.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('0g3')"><div class="sline"><div class="sc" id="c-0g3">3</div></div><div class="scard"><div class="sname">Loose cotton clothes + no backpack friction</div><div class="sdet">Tight clothes and backpack rubbing creates new pimples on existing marks. Go loose.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s0-night">
+    <div class="tlbl">Night · before bed</div>
+    <div class="sr" onclick="tog('0n1')"><div class="sline"><div class="sc" id="c-0n1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Wash face — Cetaphil Gentle Cleanser</div><div class="sdet">Remove pollution, sweat, oil from the day. Same as morning — gentle, lukewarm.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('0n2')"><div class="sline"><div class="sc" id="c-0n2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Back wash — alternate BP and Salicylic acid</div><div class="sdet">Mon/Wed/Fri → Benzoyl Peroxide. Tue/Thu → Salicylic acid. Never both same night. Salicylic goes deep into pores.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('0n3')"><div class="sline"><div class="sc" id="c-0n3">3</div></div><div class="scard"><div class="sname">Cetaphil Moisturizing Lotion on face</div><div class="sdet">Pea-sized only. No SPF at night. Prevents rebound oiliness.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s0-weekly">
+    <div class="tlbl">Weekly habits</div>
+    <div class="sr" onclick="tog('0w1')"><div class="sline"><div class="sc" id="c-0w1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Progress photos every Sunday</div><div class="sdet">Same spot, same lighting. Daily changes are invisible — photos show real progress over weeks.</div><div class="sbadges"><span class="b bp">Both</span></div></div></div>
+    <div class="sr" onclick="tog('0w2')"><div class="sline"><div class="sc" id="c-0w2">2</div></div><div class="scard"><div class="sname">Gym hygiene audit — missed any post-gym showers?</div><div class="sdet">Be honest. A pattern of misses will cancel all the good work silently.</div><div class="sbadges"><span class="b br">Critical</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s0-clinic">
+    <div class="tlbl">Clinic · Month 1–2</div>
+    <div class="abox"><span>ℹ</span>Month 1–2 clinic focus is planning + face treatment. Body peels start Month 3. Build the daily routine first.</div>
+    <div class="sr" onclick="tog('0c1')"><div class="sline"><div class="sc" id="c-0c1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Visit doctor — present your full plan</div><div class="sdet">Say: "I have widespread PIH on back, shoulders, chest and arms. Want structured plan — control acne first, then body peels for marks, then microneedling for pits." Let her refine it.</div><div class="sbadges"><span class="b bc">Clinic</span></div></div></div>
+    <div class="sr" onclick="tog('0c2')"><div class="sline"><div class="sc" id="c-0c2">2</div></div><div class="scard"><div class="sname">Confirm face treatment timeline</div><div class="sdet">Ask: "When do we start face peels? How many sessions? What to use at home between sessions?" Face = her domain.</div><div class="sbadges"><span class="b bf">Face</span><span class="b bc">Clinic</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s0-days">
+    <div class="tlbl">Day tracker · Days 1–60</div>
+    <div class="dg-hdr"><div class="dg-title">Tap any day to log your routine</div><div class="dg-stat" id="ds0">0 / 60 complete</div></div>
+    <div class="daygrid" id="g0"></div>
+    <div class="dg-leg"><span><span class="ldot" style="background:var(--gdim);border:1px solid rgba(74,222,128,.4)"></span>Complete</span><span><span class="ldot" style="background:var(--adim);border:1px solid rgba(251,191,36,.3)"></span>Partial</span><span><span class="ldot" style="background:var(--surface);border:1px solid var(--border)"></span>Not done</span></div>
+  </div>
+
+  <div class="ts" id="s1-morning">
+    <div class="tlbl">Morning · wake up</div>
+    <div class="abox"><span>✓</span>Morning stays same as Phase 1. If acne is controlled, continue. If still active, keep BP wash daily — never stop early.</div>
+    <div class="sr" onclick="tog('1m1')"><div class="sline"><div class="sc" id="c-1m1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Wash face — Cetaphil Gentle Cleanser</div><div class="sdet">Same. Never change what's working. 60 sec, lukewarm rinse.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('1m2')"><div class="sline"><div class="sc" id="c-1m2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Shower + BP body wash on back/shoulders</div><div class="sdet">If acne fully cleared, can drop to 4–5x/week. Any new pimples? Keep daily immediately — no exceptions.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('1m3')"><div class="sline"><div class="sc" id="c-1m3">3</div></div><div class="scard"><div class="sname">Cetaphil PRO SPF 30 on face</div><div class="sdet">SPF is now critical — glycolic acid at night makes skin more UV-sensitive. Never skip morning SPF this phase.</div><div class="sbadges"><span class="b bf">Face</span><span class="b br">SPF mandatory</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s1-gym">
+    <div class="tlbl">After gym</div>
+    <div class="sr" onclick="tog('1g1')"><div class="sline"><div class="sc" id="c-1g1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Change + shower within 15 mins</div><div class="sdet">Marks are fading — don't let sweat create new acne and new marks. You'd be running backwards.</div><div class="sbadges"><span class="b br">Mandatory</span></div></div></div>
+    <div class="sr" onclick="tog('1g2')"><div class="sline"><div class="sc" id="c-1g2">2</div></div><div class="scard"><div class="sname">BP wash on back (gentle if recent peel)</div><div class="sdet">Had a clinic peel in last 3 days? Be gentler — skin is sensitive post-peel. No scrubbing.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s1-night">
+    <div class="tlbl">Night · before bed</div>
+    <div class="sr" onclick="tog('1n1')"><div class="sline"><div class="sc" id="c-1n1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Wash face — Cetaphil Gentle Cleanser</div><div class="sdet">Clean face before any night products go on.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('1n2')"><div class="sline"><div class="sc" id="c-1n2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Back wash — continue alternating BP + Salicylic</div><div class="sdet">Salicylic now does double duty — unclogs pores AND fades surface pigmentation.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('1n3')"><div class="sline"><div class="sc" id="c-1n3">3</div><div class="sconn"></div></div><div class="scard"><div class="sname">⭐ NEW — Glycolic Acid on back (2–3x per week only)</div><div class="sdet">Thin layer on full back, shoulders, arms. Leave on — don't rinse. Mon/Wed/Fri works well. Skip on nights after clinic peel. This is your mark-fading weapon.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span><span class="b br">2–3x/week max</span></div></div></div>
+    <div class="sr" onclick="tog('1n4')"><div class="sline"><div class="sc" id="c-1n4">4</div><div class="sconn"></div></div><div class="scard"><div class="sname">Cetaphil Moisturizing Lotion on face</div><div class="sdet">Same night moisturizer. If doctor prescribed face serum or active — apply that before moisturizer.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('1n5')"><div class="sline"><div class="sc" id="c-1n5">5</div></div><div class="scard"><div class="sname">(Optional) Niacinamide / Azelaic acid on face marks</div><div class="sdet">Only if doctor recommends. Apply before moisturizer. Fades face PIH and evens skin tone.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s1-weekly">
+    <div class="tlbl">Weekly habits</div>
+    <div class="sr" onclick="tog('1w1')"><div class="sline"><div class="sc" id="c-1w1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Progress photos every Sunday</div><div class="sdet">Compare with Phase 1 photos now. Visible lightening starts Week 6–8.</div><div class="sbadges"><span class="b bp">Both</span></div></div></div>
+    <div class="sr" onclick="tog('1w2')"><div class="sline"><div class="sc" id="c-1w2">2</div></div><div class="scard"><div class="sname">Glycolic acid count check — 2–3x this week?</div><div class="sdet">Not more than 3x. Skin feels irritated? Drop to 1–2x and tell doctor at next visit.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s1-clinic">
+    <div class="tlbl">Clinic sessions · Month 3–4</div>
+    <div class="sr" onclick="tog('1c1')"><div class="sline"><div class="sc" id="c-1c1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Start Glycolic Acid body chemical peels</div><div class="sdet">Every 3–4 weeks. Speeds mark fading 2–3x vs at-home alone. Tell her: "Start glycolic acid body peels for PIH on back and shoulders." Cost: ₹2,000–₹6,500/session.</div><div class="sbadges"><span class="b bc">Clinic</span><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('1c2')"><div class="sline"><div class="sc" id="c-1c2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Face peels — doctor's call entirely</div><div class="sdet">Her domain. Show up, follow aftercare. Ask what to use between sessions. Don't add random products after a face peel.</div><div class="sbadges"><span class="b bf">Face</span><span class="b bc">Clinic</span></div></div></div>
+    <div class="sr" onclick="tog('1c3')"><div class="sline"><div class="sc" id="c-1c3">3</div></div><div class="scard"><div class="sname">Mid-phase review after 2–3 peel sessions</div><div class="sdet">Show progress photos. Ask: marks fading well? Upgrade to Jessner or TCA? Time to plan microneedling?</div><div class="sbadges"><span class="b bc">Clinic</span><span class="b bp">Both</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s1-days">
+    <div class="tlbl">Day tracker · Days 61–120</div>
+    <div class="dg-hdr"><div class="dg-title">Tap any day to log your routine</div><div class="dg-stat" id="ds1">0 / 60 complete</div></div>
+    <div class="daygrid" id="g1"></div>
+    <div class="dg-leg"><span><span class="ldot" style="background:var(--gdim);border:1px solid rgba(74,222,128,.4)"></span>Complete</span><span><span class="ldot" style="background:var(--adim);border:1px solid rgba(251,191,36,.3)"></span>Partial</span><span><span class="ldot" style="background:var(--surface);border:1px solid var(--border)"></span>Not done</span></div>
+  </div>
+
+  <div class="ts" id="s2-morning">
+    <div class="tlbl">Morning · wake up</div>
+    <div class="abox"><span>✓</span>4 months in — morning is a locked habit. Marks should be 60–80% faded. This phase finishes the job.</div>
+    <div class="sr" onclick="tog('2m1')"><div class="sline"><div class="sc" id="c-2m1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Wash face — Cetaphil Gentle Cleanser</div><div class="sdet">Same. Never change what works. 60 sec, lukewarm rinse.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('2m2')"><div class="sline"><div class="sc" id="c-2m2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">BP wash on back — maintenance (4–5x/week)</div><div class="sdet">If fully controlled, drop to 4–5 days. One new pimple? Go back to daily immediately.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('2m3')"><div class="sline"><div class="sc" id="c-2m3">3</div></div><div class="scard"><div class="sname">Cetaphil PRO SPF 30 on face</div><div class="sdet">SPF is now permanent — post-laser skin is more UV sensitive. Skip this and months of work reverses fast.</div><div class="sbadges"><span class="b bf">Face</span><span class="b br">Always SPF</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s2-gym">
+    <div class="tlbl">After gym</div>
+    <div class="sr" onclick="tog('2g1')"><div class="sline"><div class="sc" id="c-2g1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Change + shower within 15 mins</div><div class="sdet">5 months of work behind you. This habit stays permanent — not just for the plan period.</div><div class="sbadges"><span class="b br">Permanent habit</span></div></div></div>
+    <div class="sr" onclick="tog('2g2')"><div class="sline"><div class="sc" id="c-2g2">2</div></div><div class="scard"><div class="sname">Post-microneedling: plain water only for 48 hrs</div><div class="sdet">After a microneedling session, skin is raw. Plain water rinse only on treated area for 48 hrs. Then resume BP wash normally.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s2-night">
+    <div class="tlbl">Night · before bed</div>
+    <div class="sr" onclick="tog('2n1')"><div class="sline"><div class="sc" id="c-2n1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Wash face — Cetaphil Gentle Cleanser</div><div class="sdet">Post-CO2 laser: Cetaphil only for 1 full week — nothing else on face until doctor clears you.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+    <div class="sr" onclick="tog('2n2')"><div class="sline"><div class="sc" id="c-2n2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Salicylic acid wash on back — maintenance (3–4x/week)</div><div class="sdet">Keeps pores clear and prevents new marks. Reduce if skin feels dry.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('2n3')"><div class="sline"><div class="sc" id="c-2n3">3</div><div class="sconn"></div></div><div class="scard"><div class="sname">Glycolic acid — maintenance (1–2x/week only)</div><div class="sdet">Drop to 1–2x/week. Maintenance dose — holding results, not active treatment anymore.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('2n4')"><div class="sline"><div class="sc" id="c-2n4">4</div></div><div class="scard"><div class="sname">Cetaphil Lotion + doctor-prescribed face actives</div><div class="sdet">Whatever she prescribed at this stage — follow exactly. Moisturizer always goes last.</div><div class="sbadges"><span class="b bf">Face</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s2-weekly">
+    <div class="tlbl">Weekly habits</div>
+    <div class="sr" onclick="tog('2w1')"><div class="sline"><div class="sc" id="c-2w1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Final progress photos — Month 1 vs Month 5–6</div><div class="sdet">Side by side comparison. Bring to final doctor review. This is your proof.</div><div class="sbadges"><span class="b bp">Both</span></div></div></div>
+    <div class="sr" onclick="tog('2w2')"><div class="sline"><div class="sc" id="c-2w2">2</div></div><div class="scard"><div class="sname">Post-microneedling: extra hydration for 48 hrs</div><div class="sdet">Apply Cetaphil lotion twice/day if dry. No actives (no glycolic, no salicylic) for 48 hrs after each session.</div><div class="sbadges"><span class="b bk">Back & Shoulders</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s2-clinic">
+    <div class="tlbl">Clinic sessions · Month 5–6</div>
+    <div class="sr" onclick="tog('2c1')"><div class="sline"><div class="sc" id="c-2c1">1</div><div class="sconn"></div></div><div class="scard"><div class="sname">Microneedling for back/shoulder pits</div><div class="sdet">Marks faded → pits visible and treatable. 3–5 sessions, 4 weeks apart. Builds collagen, fills shallow pits. Cost: ₹3,000–₹15,000/session.</div><div class="sbadges"><span class="b bc">Clinic</span><span class="b bk">Back & Shoulders</span></div></div></div>
+    <div class="sr" onclick="tog('2c2')"><div class="sline"><div class="sc" id="c-2c2">2</div><div class="sconn"></div></div><div class="scard"><div class="sname">Face: Fractional CO2 laser — doctor's timing</div><div class="sdet">Doctor decides timing based on peel response. Post-laser: SPF mandatory, no actives for 7 days, follow aftercare strictly.</div><div class="sbadges"><span class="b bf">Face</span><span class="b bc">Clinic</span></div></div></div>
+    <div class="sr" onclick="tog('2c3')"><div class="sline"><div class="sc" id="c-2c3">3</div></div><div class="scard"><div class="sname">Final 6-month review with doctor</div><div class="sdet">Bring all progress photos. Target: marks 80–90% faded, pits 50–70% improved. Different skin, different person.</div><div class="sbadges"><span class="b bc">Clinic</span><span class="b bp">Full review</span></div></div></div>
+  </div>
+
+  <div class="ts" id="s2-days">
+    <div class="tlbl">Day tracker · Days 121–180</div>
+    <div class="dg-hdr"><div class="dg-title">Tap any day to log your routine</div><div class="dg-stat" id="ds2">0 / 60 complete</div></div>
+    <div class="daygrid" id="g2"></div>
+    <div class="dg-leg"><span><span class="ldot" style="background:var(--gdim);border:1px solid rgba(74,222,128,.4)"></span>Complete</span><span><span class="ldot" style="background:var(--adim);border:1px solid rgba(251,191,36,.3)"></span>Partial</span><span><span class="ldot" style="background:var(--surface);border:1px solid var(--border)"></span>Not done</span></div>
+  </div>
+
+  <div class="ts" id="s0-settings">
+    <div class="tlbl">Settings · Month 1-2</div>
+    <div class="sr" onclick="openAddHabitModal()"><div class="sline"><div class="sc">+</div></div><div class="scard"><div class="sname">Add Custom Habit</div><div class="sdet">Add your own habits to track (e.g., Drink water, Supplements). Select phase, name, and days.</div></div></div>
+  </div>
+  <div class="ts" id="s1-settings">
+    <div class="tlbl">Settings · Month 3-4</div>
+    <div class="sr" onclick="openAddHabitModal()"><div class="sline"><div class="sc">+</div></div><div class="scard"><div class="sname">Add Custom Habit</div><div class="sdet">Add your own habits to track (e.g., Drink water, Supplements). Select phase, name, and days.</div></div></div>
+  </div>
+  <div class="ts" id="s2-settings">
+    <div class="tlbl">Settings · Month 5-6</div>
+    <div class="sr" onclick="openAddHabitModal()"><div class="sline"><div class="sc">+</div></div><div class="scard"><div class="sname">Add Custom Habit</div><div class="sdet">Add your own habits to track (e.g., Drink water, Supplements). Select phase, name, and days.</div></div></div>
+  </div>
+
+</div>
+</div>
+</div>
+
+<div id="modal">
+  <div class="mbox" id="mbox"></div>
+</div>
+
+<script>
+/* PIN */
+const CORRECT='7860';
+let pbuf='';
+function pk(k){if(pbuf.length<4){pbuf+=k;rdd();if(pbuf.length===4)setTimeout(psub,120);}}
+function pdel(){pbuf=pbuf.slice(0,-1);rdd();}
+function rdd(){for(let i=0;i<4;i++){const d=document.getElementById('d'+i);d.className='pd';if(i<pbuf.length)d.classList.add('on');}}
+function psub(){
+  if(pbuf===CORRECT){
+    document.getElementById('lock').style.display='none';
+    document.getElementById('app').style.display='block';
+    init();
+    return;
+  }
+  document.getElementById('lerr').textContent='Wrong PIN — try again';
+  for(let i=0;i<4;i++)document.getElementById('d'+i).classList.add('err');
+  document.getElementById('dots').style.animation='shake .4s ease';
+  setTimeout(()=>{
+    pbuf='';rdd();
+    document.getElementById('lerr').textContent='';
+    document.getElementById('dots').style.animation='';
+    for(let i=0;i<4;i++)document.getElementById('d'+i).classList.remove('err');
+  },700);
+}
+
+/* STATE */
+let ST={};
+function ld(){try{ST=JSON.parse(localStorage.getItem('feroz_v4')||'{}')}catch(e){ST={};}}
+function sv(){try{localStorage.setItem('feroz_v4',JSON.stringify(ST))}catch(e){}}
+
+/* STEP KEYS PER PHASE */
+const PKS={
+  0:['0m1','0m2','0m3','0m4','0g1','0g2','0g3','0n1','0n2','0n3','0w1','0w2','0c1','0c2'],
+  1:['1m1','1m2','1m3','1g1','1g2','1n1','1n2','1n3','1n4','1n5','1w1','1w2','1c1','1c2','1c3'],
+  2:['2m1','2m2','2m3','2g1','2g2','2n1','2n2','2n3','2n4','2w1','2w2','2c1','2c2','2c3'],
+};
+
+/* DAY STEPS — what shows in modal per phase */
+const DS={
+  0:[
+    {sec:'Morning',items:['Cetaphil face wash (60 sec, lukewarm)','BP body wash on back — 3–5 min wait','Cetaphil PRO SPF 30 on face']},
+    {sec:'After gym',items:['Change sweaty clothes immediately','Post-gym shower + BP wash on back','Loose clothes, no backpack']},
+    {sec:'Night',items:['Cetaphil face wash','Back wash (BP or Salicylic, alternate)','Cetaphil Moisturizing Lotion (face)']}
+  ],
+  1:[
+    {sec:'Morning',items:['Cetaphil face wash (60 sec, lukewarm)','BP body wash on back (continue)','Cetaphil PRO SPF 30 on face']},
+    {sec:'After gym',items:['Change + shower within 15 mins','BP wash on back (gentle if post-peel)']},
+    {sec:'Night',items:['Cetaphil face wash','Back wash (BP/Salicylic alternate)','Glycolic acid on back (Mon/Wed/Fri only)','Cetaphil Moisturizing Lotion (face)','(Optional) Niacinamide/Azelaic on face']}
+  ],
+  2:[
+    {sec:'Morning',items:['Cetaphil face wash (60 sec, lukewarm)','BP wash on back (4–5x/week maintenance)','Cetaphil PRO SPF 30 on face']},
+    {sec:'After gym',items:['Change + shower within 15 mins','Post-microneedling: plain water only 48hrs']},
+    {sec:'Night',items:['Cetaphil face wash','Salicylic wash on back (3–4x/week)','Glycolic acid (1–2x/week maintenance)','Cetaphil Lotion + doctor face actives']}
+  ]
+};
+
+let AP=0, AS='morning';
+
+function setPhase(p){
+  AP=p;
+  document.querySelectorAll('.pnav').forEach((el,i)=>el.classList.toggle('on',i===p));
+  document.querySelectorAll('.banner').forEach((el,i)=>el.classList.toggle('on',i===p));
+  
+  // if user was on settings, keep them on settings in the new phase
+  if(AS === 'settings' || AS === 'days') {
+      setSec(AS);
+  } else {
+      setSec('morning');
+  }
+  updProg();
+  
+  if(window.innerWidth <= 850) closeMenu();
+}
+
+function setSec(s){
+  AS=s;
+  document.querySelectorAll('.ts').forEach(el=>el.classList.remove('on'));
+  const el=document.getElementById('s'+AP+'-'+s);
+  if(el)el.classList.add('on');
+  
+  document.querySelectorAll('.si').forEach(el=>el.classList.remove('on'));
+  const nav=document.getElementById('n-'+s);
+  if(nav)nav.classList.add('on');
+  
+  if(window.innerWidth <= 850) closeMenu();
+}
+
+/* MOBILE MENU */
+document.getElementById('menu-btn').addEventListener('click',toggleMenu);
+document.getElementById('overlay').addEventListener('click',closeMenu);
+
+function toggleMenu(){
+  const sb = document.getElementById('sidebar');
+  sb.classList.add('mobile');
+  sb.classList.toggle('open');
+  document.getElementById('overlay').style.display=sb.classList.contains('open')?'block':'none';
+}
+
+function closeMenu(){
+  const sb = document.getElementById('sidebar');
+  sb.classList.remove('open');
+  document.getElementById('overlay').style.display='none';
+}
+
+function tog(key){
+  ST.steps=ST.steps||{};
+  ST.steps[key]=!ST.steps[key];
+  sv();
+  document.querySelectorAll('.sr').forEach(r=>{
+    const oc=r.getAttribute('onclick')||'';
+    if(oc.includes("'"+key+"'")){
+      r.classList.toggle('done',!!ST.steps[key]);
+      const sc=r.querySelector('.sc');
+      if(sc && sc.textContent !== '+') sc.textContent=ST.steps[key]?'✓':sc.dataset.n||sc.textContent;
+    }
+  });
+  updProg();
+}
+
+function updProg(){
+  const keys=PKS[AP]||[];
+  const steps=ST.steps||{};
+  const done=keys.filter(k=>steps[k]).length;
+  const total=keys.length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('mpb').style.width=pct+'%';
+  document.getElementById('mpl').textContent=done+' / '+total;
+  document.getElementById('hprog').textContent=pct+'%';
+  updStreak();
+}
+
+function updStreak(){
+  const days=ST.days||{};
+  let streak=0;
+  const today=new Date();
+  for(let i=0;i<180;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const k='d'+dnum(d);
+    const dd=days[k];
+    if(!dd||dd.length===0){if(i>0)break;}
+    else{streak++;}
+  }
+  document.getElementById('streak').textContent='🔥 '+streak;
+}
+
+function dnum(date){
+  if(!ST.start){ST.start=new Date().toISOString();sv();}
+  const s=new Date(ST.start);
+  return Math.floor((date-s)/(86400000))+1;
+}
+
+function phaseForDay(n){return n<=60?0:n<=120?1:2;}
+
+/* GRIDS */
+function buildGrids(){
+  [0,1,2].forEach(ph=>{
+    const grid=document.getElementById('g'+ph);
+    if(!grid)return;
+    grid.innerHTML='';
+    const start=ph*60+1;
+    for(let d=0;d<60;d++){
+      const n=start+d;
+      const cell=document.createElement('div');
+      cell.className='dc';
+      cell.textContent=n;
+      cell.id='dc'+n;
+      cell.onclick=()=>openModal(n);
+      grid.appendChild(cell);
+    }
+    updGrid(ph);
+  });
+}
+
+function updGrid(ph){
+  const days=ST.days||{};
+  const start=ph*60+1;
+  let done=0;
+  
+  // Base items length
+  const baseItems = DS[ph].reduce((a,s)=>a+s.items.length,0);
+  
+  for(let d=0;d<60;d++){
+    const n=start+d;
+    const cell=document.getElementById('dc'+n);
+    if(!cell)continue;
+    const k='d'+n;
+    const checked=(days[k]||[]).length;
+    
+    // Calculate custom items for this specific day
+    let customItems = 0;
+    if(ST.custom && ST.custom[ph]){
+        ST.custom[ph].forEach(c => {
+            if(c.days.includes(n - ph*60)) customItems++;
+        });
+    }
+    const totalItems = baseItems + customItems;
+
+    cell.className='dc';
+    if(checked===0){}
+    else if(checked>=totalItems){cell.classList.add('full');done++;}
+    else cell.classList.add('part');
+  }
+  const stat=document.getElementById('ds'+ph);
+  if(stat)stat.textContent=done+' / 60 complete';
+}
+
+/* TRACKER MODAL */
+function openModal(n){
+  const ph=phaseForDay(n);
+  // Deep copy so we don't accidentally mutate the global DS object
+  const secs=JSON.parse(JSON.stringify(DS[ph])); 
+  
+  // Inject custom habits for this phase AND this day
+  if(ST.custom && ST.custom[ph]){
+    const dayInPhase = n - ph*60;
+    const customForDay = [];
+    ST.custom[ph].forEach(c=>{
+      if(c.days.includes(dayInPhase)){
+        customForDay.push(c.name);
+      }
+    });
+    if(customForDay.length > 0) {
+        secs.push({sec:'Custom Habits',items:customForDay});
+    }
+  }
+
+  const k='d'+n;
+  const days=ST.days||{};
+  const checked=days[k]||[];
+
+  let idx=0;
+  let html=`<div class="mhdr"><div class="mtitle">Day ${n}</div><button class="mclose" onclick="closeModal()">✕</button></div>`;
+  html+=`<div class="msub">Phase ${ph+1} · ${ph===0?'Month 1–2':ph===1?'Month 3–4':'Month 5–6'}</div>`;
+
+  secs.forEach(sec=>{
+    html+=`<div class="mseclbl">${sec.sec}</div>`;
+    sec.items.forEach(item=>{
+      const isChk=checked.includes(idx);
+      html+=`<label class="mcheck${isChk?' ck':''}"><input type="checkbox" ${isChk?'checked':''} onchange="togDay(${n},${idx},this,${ph})"><span>${item}</span></label>`;
+      idx++;
+    });
+  });
+  html+=`<button class="msave" onclick="closeModal()">Save & close</button>`;
+
+  document.getElementById('mbox').innerHTML=html;
+  document.getElementById('modal').classList.add('on');
+}
+
+function togDay(n,idx,el,ph){
+  ST.days=ST.days||{};
+  const k='d'+n;
+  ST.days[k]=ST.days[k]||[];
+  if(el.checked){if(!ST.days[k].includes(idx))ST.days[k].push(idx);}
+  else{ST.days[k]=ST.days[k].filter(i=>i!==idx);}
+  sv();
+  el.closest('.mcheck').classList.toggle('ck',el.checked);
+  updGrid(ph);
+  updStreak();
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('on');}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+/* HABIT SETTINGS MODAL */
+function openAddHabitModal(){
+  let html=`<div class="mhdr"><div class="mtitle">Add Habit</div><button class="mclose" onclick="closeModal()">✕</button></div>`;
+  html+=`<div class="mseclbl" style="margin-top:0;">Phase</div>`;
+  html+=`<select id="habit-phase" class="h-input">
+          <option value="0" ${AP===0?'selected':''}>Month 1–2</option>
+          <option value="1" ${AP===1?'selected':''}>Month 3–4</option>
+          <option value="2" ${AP===2?'selected':''}>Month 5–6</option>
+         </select>`;
+         
+  html+=`<div class="mseclbl">Habit Name</div>`;
+  html+=`<input id="habit-name" type="text" class="h-input" placeholder="e.g., Drink 2L water, Vitamin C..." maxlength="40">`;
+  
+  html+=`<div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div class="mseclbl" style="margin-bottom:10px;">Select Days (1-60)</div>
+            <button class="sel-all" id="btn-sel-all" onclick="toggleAllHabitDays()">Select All</button>
+         </div>`;
+         
+  html+=`<div class="hab-grid" id="h-grid">`;
+  for(let i=1;i<=60;i++){
+    html+=`<div class="h-day" id="hd-${i}" onclick="togHabDay(${i})">${i}</div>`;
+  }
+  html+=`</div>`;
+  
+  html+=`<button class="msave" onclick="saveCustomHabit()">Save Habit</button>`;
+  
+  document.getElementById('mbox').innerHTML=html;
+  document.getElementById('modal').classList.add('on');
+}
+
+let allDaysSelected = false;
+
+function togHabDay(d) {
+    const el = document.getElementById('hd-'+d);
+    el.classList.toggle('on');
+}
+
+function toggleAllHabitDays() {
+    allDaysSelected = !allDaysSelected;
+    const btn = document.getElementById('btn-sel-all');
+    btn.textContent = allDaysSelected ? "Deselect All" : "Select All";
+    
+    for(let i=1; i<=60; i++) {
+        const el = document.getElementById('hd-'+i);
+        if(allDaysSelected) el.classList.add('on');
+        else el.classList.remove('on');
+    }
+}
+
+function saveCustomHabit(){
+  const phase = parseInt(document.getElementById('habit-phase').value);
+  const name = document.getElementById('habit-name').value.trim();
+  
+  if(!name) return alert('Please enter a habit name.');
+  
+  const days = [];
+  for(let i=1; i<=60; i++) {
+      if(document.getElementById('hd-'+i).classList.contains('on')) {
+          days.push(i);
+      }
+  }
+  
+  if(days.length === 0) return alert('Please select at least one day.');
+  
+  ST.custom = ST.custom || {};
+  ST.custom[phase] = ST.custom[phase] || [];
+  
+  const key = `c${Date.now()}`;
+  ST.custom[phase].push({key, name, days});
+  sv();
+  
+  // Re-render grids to accommodate new habit logic
+  updGrid(phase);
+  
+  closeModal();
+  setTimeout(() => {
+    alert(`"${name}" added to Phase ${phase+1}! It will now appear in your Day Tracker.`);
+  }, 300);
+}
+
+/* INIT */
+function init(){
+  ld();
+  if(!ST.start){ST.start=new Date().toISOString();sv();}
+  const steps=ST.steps||{};
+  Object.keys(steps).forEach(key=>{
+    if(!steps[key])return;
+    document.querySelectorAll('.sr').forEach(r=>{
+      const oc=r.getAttribute('onclick')||'';
+      if(oc.includes("'"+key+"'")){
+        r.classList.add('done');
+        const sc=r.querySelector('.sc');
+        if(sc && sc.textContent !== '+') sc.textContent='✓';
+      }
+    });
+  });
+  buildGrids();
+  updProg();
+  setSec('morning');
+  
+  // Initialize sidebar based on screen size so it works properly
+  if(window.innerWidth <= 850) {
+      document.getElementById('sidebar').classList.add('mobile');
+  }
+}
+
+window.addEventListener('resize', () => {
+    const sb = document.getElementById('sidebar');
+    if(window.innerWidth > 850) {
+        sb.classList.remove('mobile', 'open');
+        document.getElementById('overlay').style.display='none';
+    } else {
+        sb.classList.add('mobile');
+    }
+});
+</script>
+</body>
+</html>
